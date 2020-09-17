@@ -149,7 +149,7 @@ for new_set in filtered_sets:
         card_name_en = ""
         card_name_element = card_details_element.find("h4")
         if (len(card_name_element.contents) == 5): #some sets have card names are translated
-            log.write("Card name is translated")
+            log.write(f"Card name for {card_id} is translated\n")
             card_name_jp = card_name_element.contents[0].rstrip()
             card_name_en = card_name_element.contents[2].rstrip("\t")
         else:
