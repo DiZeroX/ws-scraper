@@ -13,6 +13,8 @@ class CardSetBasic:
         self.img = i    
 
 BASE_URL = "https://littleakiba.com/tcg/weiss-schwarz/"
+if not os.path.exists("output/littleakiba/"):
+    os.makedirs("output/littleakiba")
 
 log = open("output/littleakiba/log.txt", "a", encoding="utf-8")
 log.write(f"\n{datetime.now()}\n")
@@ -116,9 +118,18 @@ for new_set in filtered_sets:
         card_soup = BeautifulSoup(card_page.content, "lxml")
         card_details_element = card_soup.find("div", class_="card_details")
 
+        card_rarity = ""
         card_id = card_details_element.find("small").text.replace("/", "-")
-        card_collection_id = card_id.split()[0]
-        card_rarity = card_id.split()[1]
+        card_id_split = card_id.split()
+
+        if (len(card_id_split) == 1): # incomplete id, probably missing rarity
+            log.write(f"Incomplete card_id: {card_id}\n")
+            print(f"Incomplete card_id: {card_id}")
+            card_collection_id = card_id_split[0].rstrip(" ")
+            card_rarity = "ERROR"
+        else:
+            card_collection_id = card_id_split[0]
+            card_rarity = card_id.split()[1]
         card_id = card_id.replace(" ", "_")
 
         # download card image
@@ -134,7 +145,15 @@ for new_set in filtered_sets:
             else:
                 log.write(f"ERROR: Unable to download card image {card_id} for set {new_set_id}\n")
 
-        card_name_jp = card_details_element.find("h4").text.rstrip()
+        card_name_jp = ""
+        card_name_en = ""
+        card_name_element = card_details_element.find("h4")
+        if (len(card_name_element.contents) == 5): #some sets have card names are translated
+            log.write("Card name is translated")
+            card_name_jp = card_name_element.contents[0].rstrip()
+            card_name_en = card_name_element.contents[2].rstrip("\t")
+        else:
+            card_name_jp = card_details_element.find("h4").text
         
         card_stat_list_element = card_details_element.find("ul")
         card_stat_list_item_elements = card_stat_list_element.find_all("li")
@@ -174,6 +193,7 @@ for new_set in filtered_sets:
 
         card_data = {
             "name_jp": card_name_jp,
+            "name_en": card_name_en,
             "collection_id": card_collection_id,
             "rarity": card_rarity,
             "type": card_type,
@@ -203,6 +223,7 @@ for new_set in filtered_sets:
     scraped_sets_file.write(f"{new_set.title}<-=->{new_set.link}\n")
     scraped_sets_file.flush()
     log.flush()
+    print(f"Completed set: {new_set.title}")
 
 scraped_sets_file.close()
 log.close()
