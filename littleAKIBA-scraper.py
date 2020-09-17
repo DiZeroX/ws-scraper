@@ -153,7 +153,7 @@ for new_set in filtered_sets:
             card_name_jp = card_name_element.contents[0].rstrip()
             card_name_en = card_name_element.contents[2].rstrip("\t")
         else:
-            card_name_jp = card_details_element.find("h4").text
+            card_name_jp = card_details_element.find("h4").text.rstrip()
         
         card_stat_list_element = card_details_element.find("ul")
         card_stat_list_item_elements = card_stat_list_element.find_all("li")
