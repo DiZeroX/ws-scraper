@@ -2,3 +2,4 @@ output/
 .vscode/
 output.zip
 ws_scrapy/output/
+.idea/
